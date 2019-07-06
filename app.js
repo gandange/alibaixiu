@@ -33,6 +33,7 @@ mongoose.connect('mongodb://caiwei:caiwei@localhost:27017/alibaixiu', { useNewUr
 	.then(() => console.log('数据库连接成功'))
 	.catch(() => console.log('数据库连接失败'));
 
+
 // 路由
 require('./routes')(app);
 // 返回系统监听

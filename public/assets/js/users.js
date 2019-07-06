@@ -126,19 +126,76 @@ $("#modify_section").on("submit","#modify_user",function(){
         alert("删除操作已成功取消！")
         return
      }
-     $.ajax({
+     // 根据拿到的数据去删除
+     delect_user(thisId);
+ })
+ // 删除多个用户的  选择多个文件------------------
+ $("#select").on("change",".selectAll",function(){
+     // 全选按钮
+     const status = $(this).prop("checked");
+     // 其他的按钮都被选中
+     $("#select").find(".select_in").prop("checked",status);
+     // 把批量删除按钮显示出来 还要统计被删除的条数
+     const statsum = statistics()
+     // 显示批量删除按钮 并显示条数
+     status ? $("#del_all").html("批量删除" + statsum +"个用户").css('display','block') : $("#del_all").css('display','none');
+     statisticalID();
+ })
+//  删除多个用户 手动选择多个文件。选择个数等于 全部 全选按钮 选中
+$("#select").on("change",".select_in",function(){
+    // 只要选择了就让 批量删除按钮出来
+    const statsum = statistics();
+    statsum > 0 ? $("#del_all").html("批量删除" + statsum +"个用户").css('display','block') : $("#del_all").css('display','none');
+     // 选择选中之后 全选按钮要选中
+     statsum == $("#select").find(".select_in").length ? $(".selectAll").prop("checked",true) : $(".selectAll").prop("checked",false)
+     // 添加需要删除的个数
+     statisticalID();
+})
+// 批量删除核心代码 -------
+$("#del_all").on("click",function(){
+    const statsum = statistics();
+     // 发起删除多个的请求
+     const isDele = confirm("您确定要删除下列" + statsum + "个用户吗？");
+     // 收集要删除的 ID字符串
+     let deloArray = statisticalID();
+ 
+     if(!isDele){
+        return
+     }
+     // 拿到的数据数据可以删数据
+     let okdel = statisticalID();
+     //  重新渲染列表
+     delect_user(okdel);
+})
+ 
+ // 删除用户封装
+ function delect_user(idorids){
+    $.ajax({
         type : 'delete',
-        url : '/users/' + thisId,
+        url : '/users/' + idorids,
         success :function(res){
             // 返回你要删除掉额那条数据
             startlist();
         },
         error : function(err){
-             alert(err['message'])
+             alert("删除失败")
         }
     })
-     // 根据拿到的数据去删除
-     
-     
- })
+ }
+ // 统计被选择的数量
+ function statistics(){
+     return $("#select").find(".select_in").filter(":checked").length;
+ }
+ // 统计被选择ID并存储在数组当中
+  function statisticalID(){
+    const delectIds = [];
+     // 遍历被选择的按钮的ID 存储在 数组中
+     const checkedBtn =  $("#select").find(".select_in").filter(":checked");
+     checkedBtn.each(function(index,item){
+              delectIds.push($(item).attr("data-id"))   
+     })
+    // 吧这个数据处理成 字符串拼接
+    return delectIds.join("-");
+      
+  }
 })
